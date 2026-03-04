@@ -2,7 +2,13 @@ require("dotenv").config({
   path: `.env.${process.env.NODE_ENV}`,
 });
 
-const robots = process.env.GATSBY_ROBOTS || "show";
+// "hidden" = entire site delisted: robots.txt Disallow: / and every page gets noindex, nofollow
+// Set GATSBY_ROBOTS=show to allow indexing again
+const robots = process.env.GATSBY_ROBOTS || "hidden";
+const noindexPaths = process.env.GATSBY_NOINDEX_PATHS
+  ? process.env.GATSBY_NOINDEX_PATHS.split(",").map((p) => p.trim())
+  : [];
+
 module.exports = {
   siteMetadata: {
     defaultTitle:
@@ -233,9 +239,16 @@ module.exports = {
           production: {
             sitemap: `https://4geeksacademy.com/sitemap.xml`,
             policy:
-              robots !== "hidden"
-                ? [{ userAgent: "*" }]
-                : [{ userAgent: "*", disallow: ["/"] }],
+              robots === "hidden"
+                ? [{ userAgent: "*", disallow: ["/"] }]
+                : [
+                    {
+                      userAgent: "*",
+                      ...(noindexPaths.length
+                        ? { disallow: noindexPaths }
+                        : {}),
+                    },
+                  ],
           },
           development: {
             policy: [{ userAgent: "*", disallow: ["/"] }],

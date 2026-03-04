@@ -143,9 +143,11 @@ const SEO = (props) => {
           name="description"
           content={description || excerpt || defaultDescription[lang]}
         />
-        {["hidden", "unlisted"].includes(context.visibility || visibility) && (
-          <meta name="robots" content="noindex" />
-        )}
+        {(typeof process !== "undefined" &&
+          process.env?.GATSBY_ROBOTS === "hidden") ||
+        ["hidden", "unlisted"].includes(context.visibility || visibility) ? (
+          <meta name="robots" content="noindex, nofollow" />
+        ) : null}
         <meta name="image" content={previewImage} />
         {type === "blog" ? (
           <meta property="og:type" content="article" />
